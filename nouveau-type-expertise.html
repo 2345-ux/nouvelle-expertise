@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Types d'Expertises - Expertise Médicale</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .nav-link {
+            color: #fff;
+            font-weight: 500;
+        }
+        .navbar-brand {
+            font-weight: 700;
+        }
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: none;
+        }
+        .btn-action {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        .required-field::after {
+            content: " *";
+            color: red;
+        }
+        .types-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .content-wrapper {
+            flex: 1 0 auto;
+        }
+        footer {
+            flex-shrink: 0;
+            margin-top: auto;
+        }
+        .badge-type {
+            font-size: 0.9rem;
+            padding: 0.5rem 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Barre de navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">Expertise Médicale</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="nouvelle-expertise.html">Nouvelle Expertise</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="nouveau-medecin.html">Nouveau Médecin</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="nouveau-type-expertise.html">Nouveau Type d'Expertise</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="content-wrapper">
+        <div class="container">
+            <div class="types-header">
+                <h1>Types d'Expertises Médicales</h1>
+                <div>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#typeExpertiseModal">
+                        <i class="bi bi-plus-circle"></i> Nouveau Type d'Expertise
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Tableau des types d'expertises -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover" id="types-table">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Nom</th>
+                                    <th>Description</th>
+                                    <th>Catégorie</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>EXP-T-001</td>
+                                    <td>Cardiologie</td>
+                                    <td>Examen et analyse des affections cardiaques</td>
+                                    <td>Médecine interne</td>
+                                    <td><span class="badge bg-success">Actif</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary btn-action edit-btn" data-id="EXP-T-001">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger btn-action delete-btn" data-id="EXP-T-001">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>EXP-T-002</td>
+                                    <td>Neurologie</td>
+                                    <td>Évaluation des troubles neurologiques</td>
+                                    <td>Médecine spécialisée</td>
+                                    <td><span class="badge bg-success">Actif</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary btn-action edit-btn" data-id="EXP-T-002">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger btn-action delete-btn" data-id="EXP-T-002">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>EXP-T-003</td>
+                                    <td>Orthopédique</td>
+                                    <td>Analyse des troubles musculosquelettiques</td>
+                                    <td>Chirurgie</td>
+                                    <td><span class="badge bg-success">Actif</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary btn-action edit-btn" data-id="EXP-T-003">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger btn-action delete-btn" data-id="EXP-T-003">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>EXP-T-004</td>
+                                    <td>Psychiatrique</td>
+                                    <td>Évaluation de l'état mental et psychologique</td>
+                                    <td>Médecine psychologique</td>
+                                    <td><span class="badge bg-success">Actif</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary btn-action edit-btn" data-id="EXP-T-004">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger btn-action delete-btn" data-id="EXP-T-004">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>EXP-T-005</td>
+                                    <td>Traumatologique</td>
+                                    <td>Analyse des traumatismes physiques</td>
+                                    <td>Médecine d'urgence</td>
+                                    <td><span class="badge bg-success">Actif</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary btn-action edit-btn" data-id="EXP-T-005">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger btn-action delete-btn" data-id="EXP-T-005">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>EXP-T-006</td>
+                                    <td>Médecine légale</td>
+                                    <td>Expertises médico-légales</td>
+                                    <td>Médecine judiciaire</td>
+                                    <td><span class="badge bg-secondary">Inactif</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary btn-action edit-btn" data-id="EXP-T-006">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger btn-action delete-btn" data-id="EXP-T-006">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour ajouter/modifier un type d'expertise -->
+    <div class="modal fade" id="typeExpertiseModal" tabindex="-1" aria-labelledby="typeExpertiseModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="typeExpertiseModalLabel">Nouveau Type d'Expertise</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="type-expertise-form">
+                        <div class="mb-3">
+                            <label for="code-type" class="form-label">Code du type</label>
+                            <input type="text" class="form-control" id="code-type" readonly value="EXP-T-007">
+                            <small class="text-muted">Code généré automatiquement</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="nom-type" class="form-label required-field">Nom du type d'expertise</label>
+                            <input type="text" class="form-control" id="nom-type" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description-type" class="form-label">Description</label>
+                            <textarea class="form-control" id="description-type" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="categorie-type" class="form-label">Catégorie</label>
+                            <select class="form-select" id="categorie-type">
+                                <option value="" selected disabled>Sélectionnez une catégorie</option>
+                                <option value="Médecine interne">Médecine interne</option>
+                                <option value="Médecine spécialisée">Médecine spécialisée</option>
+                                <option value="Chirurgie">Chirurgie</option>
+                                <option value="Médecine psychologique">Médecine psychologique</option>
+                                <option value="Médecine d'urgence">Médecine d'urgence</option>
+                                <option value="Médecine judiciaire">Médecine judiciaire</option>
+                                <option value="Autre">Autre</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="statut-type" class="form-label">Statut</label>
+                            <select class="form-select" id="statut-type">
+                                <option value="actif" selected>Actif</option>
+                                <option value="inactif">Inactif</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="button" class="btn btn-primary" id="save-type">Enregistrer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmation de suppression -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmer la suppression</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer ce type d'expertise ?</p>
+                    <p class="text-danger">Cette action est irréversible et pourrait affecter les expertises existantes utilisant ce type.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-danger" id="confirm-delete">Supprimer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Expertise Médicale</h5>
+                    <p>Application de gestion des expertises médicales</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>&copy; 2023 Expertise Médicale. Tous droits réservés.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Initialiser DataTables pour le tableau avec chargement AJAX
+            var typesTable = $('#types-table').DataTable({
+                ajax: {
+                    url: 'liste_type_expertises.php',
+                    type: 'GET',
+                    dataSrc: function(json) {
+                        // Vérifier si la réponse est valide
+                        if (json.status === 'success' && json.types) {
+                            return json.types;
+                        }
+                        return [];
+                    },
+                    error: function(xhr, error, thrown) {
+                        console.error('Erreur AJAX:', error, thrown);
+                        alert('Erreur lors du chargement des données');
+                    }
+                },
+                columns: [
+                    { data: 'code_type' },
+                    { data: 'nom_type' },
+                    { data: 'description' },
+                    { data: 'categorie' },
+                    { 
+                        data: 'statut',
+                        render: function(data) {
+                            let badge = data === 'actif' ? 'bg-success' : 'bg-secondary';
+                            return `<span class="badge ${badge}">${data}</span>`;
+                        }
+                    },
+                    {
+                        data: 'code_type',
+                        render: function(data) {
+                            return `
+                                <button class="btn btn-sm btn-primary btn-action edit-btn" data-id="${data}">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger btn-action delete-btn" data-id="${data}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            `;
+                        }
+                    }
+                ],
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/fr-FR.json'
+                },
+                processing: true, // Afficher l'indicateur de chargement
+                serverSide: false, // Pas de pagination côté serveur
+                pageLength: 10,
+                responsive: true
+            });
+
+            // Fonction pour rafraîchir le tableau
+            function refreshTable() {
+                typesTable.ajax.reload();
+            }
+
+            // Après un ajout/modification/suppression réussi
+            function handleSuccess() {
+                refreshTable();
+            }
+
+            // Gérer le clic sur le bouton Modifier
+            $(document).on('click', '.edit-btn', function() {
+                const typeId = $(this).data('id');
+                
+                // Charger les données du type d'expertise
+                $.ajax({
+                    url: 'liste_type_expertises.php',
+                    type: 'GET',
+                    data: { code: typeId },
+                    dataType: 'json',
+                    success: function(response) {
+                        if(response.status === 'success' && response.types.length > 0) {
+                            const type = response.types[0];
+                            $('#typeExpertiseModalLabel').text('Modifier Type d\'Expertise');
+                            $('#code-type').val(type.code_type);
+                            $('#nom-type').val(type.nom_type);
+                            $('#description-type').val(type.description);
+                            $('#categorie-type').val(type.categorie);
+                            $('#statut-type').val(type.statut);
+                            
+                            $('#typeExpertiseModal').modal('show');
+                        } else {
+                            alert('Erreur lors du chargement des données');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Erreur:', error);
+                        alert('Erreur lors du chargement des données');
+                    }
+                });
+            });
+
+            // Gérer le clic sur le bouton Supprimer
+            $(document).on('click', '.delete-btn', function() {
+                const typeId = $(this).data('id');
+                $('#deleteConfirmModal').data('type-id', typeId);
+                $('#deleteConfirmModal').modal('show');
+            });
+            
+            // Confirmer la suppression
+            $('#confirm-delete').on('click', function() {
+                const typeId = $('#deleteConfirmModal').data('type-id');
+                
+                $.ajax({
+                    url: 'supprimer_typesexpertise.php',
+                    type: 'POST',
+                    data: { code_type: typeId },
+                    dataType: 'json',
+                    success: function(response) {
+                        if(response.status === 'success') {
+                            $('#deleteConfirmModal').modal('hide');
+                            refreshTable();
+                            alert(response.message);
+                        } else {
+                            alert('Erreur: ' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Erreur:', xhr.responseText);
+                        alert('Erreur lors de la suppression: ' + error);
+                    }
+                });
+            });
+
+            // Gérer le clic sur le bouton Nouveau Type d'Expertise
+            $('#typeExpertiseModal').on('show.bs.modal', function(e) {
+                // Si c'est un nouveau type d'expertise (et non une modification)
+                if ($(e.relatedTarget).hasClass('btn-success')) {
+                    // Réinitialiser le formulaire
+                    $('#type-expertise-form')[0].reset();
+                    $('#typeExpertiseModalLabel').text('Nouveau Type d\'Expertise');
+                    $('#code-type').val('EXP-T-007');
+                    $('#statut-type').val('actif');
+                }
+            });
+            
+            // Modifier le gestionnaire d'événement save-type
+            $('#save-type').on('click', function() {
+                if(document.getElementById('type-expertise-form').checkValidity()) {
+                    const formData = {
+                        code_type: $('#code-type').val(),
+                        nom_type: $('#nom-type').val(),
+                        description_type: $('#description-type').val() || '',
+                        categorie_type: $('#categorie-type').val() || '',
+                        statut_type: $('#statut-type').val()
+                    };
+
+                    // Déterminer si c'est un ajout ou une modification
+                    const isEdit = formData.code_type !== 'EXP-T-007';
+                    const url = isEdit ? 'modifier_typesexpertise.php' : 'ajout_type_expertise.php';
+
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        data: formData,
+                        dataType: 'json',
+                        success: function(response) {
+                            if(response.status === 'success') {
+                                $('#typeExpertiseModal').modal('hide');
+                                refreshTable();
+                                alert(response.message);
+                            } else {
+                                alert('Erreur: ' + response.message);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Erreur:', xhr.responseText);
+                            alert('Erreur lors de l\'opération: ' + error);
+                        }
+                    });
+                } else {
+                    document.getElementById('type-expertise-form').reportValidity();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

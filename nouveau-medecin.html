@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Médecins - Expertise Médicale</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .nav-link {
+            color: #fff;
+            font-weight: 500;
+        }
+        .navbar-brand {
+            font-weight: 700;
+        }
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: none;
+        }
+        .btn-action {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        .required-field::after {
+            content: " *";
+            color: red;
+        }
+        .medecin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .content-wrapper {
+            flex: 1 0 auto;
+        }
+        footer {
+            flex-shrink: 0;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Barre de navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">Expertise Médicale</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="nouvelle-expertise.html">Nouvelle Expertise</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="nouveau-medecin.html">Nouveau Médecin</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="nouveau-type-expertise.html">Nouveau Type d'Expertise</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="content-wrapper">
+        <div class="container">
+            <div class="medecin-header">
+                <h1>Gestion des Médecins</h1>
+                <div>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#medecinModal">
+                        <i class="bi bi-plus-circle"></i> Nouveau Médecin
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Tableau des médecins -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover" id="medecins-table">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Nom</th>
+                                    <th>Sexe</th>
+                                    <th>Spécialité</th>
+                                    <th>Téléphone</th>
+                                    <th>Email</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>MED-001</td>
+                                    <td>Dr. Dupont</td>
+                                    <td>Masculin</td>
+                                    <td>Cardiologie</td>
+                                    <td>01 23 45 67 89</td>
+                                    <td>dupont@example.com</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary btn-action edit-btn" data-id="MED-001">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger btn-action delete-btn" data-id="MED-001">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>MED-002</td>
+                                    <td>Dr. Martin</td>
+                                    <td>Masculin</td>
+                                    <td>Neurologie</td>
+                                    <td>01 23 45 67 90</td>
+                                    <td>martin@example.com</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary btn-action edit-btn" data-id="MED-002">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger btn-action delete-btn" data-id="MED-002">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>MED-003</td>
+                                    <td>Dr. Dubois</td>
+                                    <td>Masculin</td>
+                                    <td>Orthopédie</td>
+                                    <td>01 23 45 67 91</td>
+                                    <td>dubois@example.com</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary btn-action edit-btn" data-id="MED-003">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger btn-action delete-btn" data-id="MED-003">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>MED-004</td>
+                                    <td>Dr. Bernard</td>
+                                    <td>Masculin</td>
+                                    <td>Psychiatrie</td>
+                                    <td>01 23 45 67 92</td>
+                                    <td>bernard@example.com</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary btn-action edit-btn" data-id="MED-004">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger btn-action delete-btn" data-id="MED-004">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>MED-005</td>
+                                    <td>Dr. Moreau</td>
+                                    <td>Féminin</td>
+                                    <td>Traumatologie</td>
+                                    <td>01 23 45 67 93</td>
+                                    <td>moreau@example.com</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary btn-action edit-btn" data-id="MED-005">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger btn-action delete-btn" data-id="MED-005">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour ajouter/modifier un médecin -->
+    <div class="modal fade" id="medecinModal" tabindex="-1" aria-labelledby="medecinModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="medecinModalLabel">Nouveau Médecin</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="medecin-form">
+                        <div class="mb-3">
+                            <label for="code-medecin" class="form-label">Code médecin</label>
+                            <input type="text" class="form-control" id="code-medecin" readonly value="MED-006">
+                            <small class="text-muted">Code généré automatiquement</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="nom-medecin" class="form-label required-field">Nom du médecin</label>
+                            <input type="text" class="form-control" id="nom-medecin" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="sexe-medecin" class="form-label required-field">Sexe</label>
+                            <select class="form-select" id="sexe-medecin" required>
+                                <option value="" selected disabled>Sélectionnez un sexe</option>
+                                <option value="masculin">Masculin</option>
+                                <option value="feminin">Féminin</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="specialite-medecin" class="form-label">Spécialité</label>
+                            <input type="text" class="form-control" id="specialite-medecin">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="telephone-medecin" class="form-label">Téléphone</label>
+                            <input type="tel" class="form-control" id="telephone-medecin">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email-medecin" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email-medecin">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="button" class="btn btn-primary" id="save-medecin">Enregistrer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmation de suppression -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmer la suppression</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer ce médecin ?</p>
+                    <p class="text-danger">Cette action est irréversible.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-danger" id="confirm-delete">Supprimer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Expertise Médicale</h5>
+                    <p>Application de gestion des expertises médicales</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>&copy; 2023 Expertise Médicale. Tous droits réservés.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Initialiser DataTables pour le tableau avec chargement AJAX
+            var medecinsTable = $('#medecins-table').DataTable({
+                ajax: {
+                    url: 'liste_medecin.php',
+                    type: 'GET',
+                    dataSrc: function(json) {
+                        if (json.status === 'success' && json.medecins) {
+                            return json.medecins;
+                        }
+                        return [];
+                    },
+                    error: function(xhr, error, thrown) {
+                        console.error('Erreur AJAX:', error);
+                        alert('Erreur lors du chargement des médecins');
+                    }
+                },
+                columns: [
+                    { data: 'code' },
+                    { data: 'nom' },
+                    { data: 'sexe' },
+                    { data: 'specialite' },
+                    { data: 'telephone' },
+                    { data: 'email' },
+                    {
+                        data: 'code',
+                        render: function(data) {
+                            return `
+                                <button class="btn btn-sm btn-primary btn-action edit-btn" data-id="${data}">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger btn-action delete-btn" data-id="${data}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            `;
+                        }
+                    }
+                ],
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/fr-FR.json'
+                },
+                pageLength: 10,
+                responsive: true
+            });
+
+            // Fonction pour rafraîchir le tableau
+            function refreshTable() {
+                medecinsTable.ajax.reload();
+            }
+
+            // Après un ajout/modification/suppression réussi
+            function handleSuccess() {
+                refreshTable();
+            }
+
+            // Gérer le clic sur le bouton Modifier
+            $(document).on('click', '.edit-btn', function() {
+                const medecinId = $(this).data('id');
+                
+                // Charger les données du médecin
+                $.ajax({
+                    url: 'liste_medecin.php',
+                    type: 'GET',
+                    data: { code: medecinId },
+                    dataType: 'json',
+                    success: function(response) {
+                        if(response.status === 'success' && response.medecins.length > 0) {
+                            const medecin = response.medecins[0];
+                            $('#medecinModalLabel').text('Modifier Médecin');
+                            $('#code-medecin').val(medecin.code);
+                            $('#nom-medecin').val(medecin.nom);
+                            $('#sexe-medecin').val(medecin.sexe.toLowerCase());
+                            $('#specialite-medecin').val(medecin.specialite);
+                            $('#telephone-medecin').val(medecin.telephone);
+                            $('#email-medecin').val(medecin.email);
+                            
+                            $('#medecinModal').modal('show');
+                        } else {
+                            alert('Erreur lors du chargement des données du médecin');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Erreur:', error);
+                        alert('Erreur lors du chargement des données');
+                    }
+                });
+            });
+
+            // Gérer le clic sur le bouton Supprimer
+            $(document).on('click', '.delete-btn', function() {
+                const medecinId = $(this).data('id');
+                $('#deleteConfirmModal').data('medecin-id', medecinId);
+                $('#deleteConfirmModal').modal('show');
+            });
+            
+            // Confirmer la suppression
+            $('#confirm-delete').on('click', function() {
+                const medecinId = $('#deleteConfirmModal').data('medecin-id');
+                
+                $.ajax({
+                    url: 'supprimer_medecin.php',
+                    type: 'POST',
+                    data: { code: medecinId },
+                    dataType: 'json',
+                    success: function(response) {
+                        if(response.status === 'success') {
+                            $('#deleteConfirmModal').modal('hide');
+                            refreshTable();
+                            alert(response.message);
+                        } else {
+                            alert('Erreur: ' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Erreur:', xhr.responseText);
+                        alert('Erreur lors de la suppression: ' + error);
+                    }
+                });
+            });
+
+            // Gérer le clic sur le bouton Nouveau Médecin
+            $('#medecinModal').on('show.bs.modal', function(e) {
+                // Si c'est un nouveau médecin (et non une modification)
+                if ($(e.relatedTarget).hasClass('btn-success')) {
+                    // Réinitialiser le formulaire
+                    $('#medecin-form')[0].reset();
+                    $('#medecinModalLabel').text('Nouveau Médecin');
+                    $('#code-medecin').val('MED-006');
+                }
+            });
+            
+            // Modifier le gestionnaire d'événement save-medecin
+            $('#save-medecin').on('click', function() {
+                if(document.getElementById('medecin-form').checkValidity()) {
+                    const formData = {
+                        code: $('#code-medecin').val(),
+                        nom: $('#nom-medecin').val(),
+                        sexe: $('#sexe-medecin').val(),
+                        specialite: $('#specialite-medecin').val() || '',
+                        telephone: $('#telephone-medecin').val() || '',
+                        email: $('#email-medecin').val() || ''
+                    };
+
+                    // Déterminer si c'est un ajout ou une modification
+                    const isEdit = formData.code !== 'MED-006';
+                    const url = isEdit ? 'modifier_medecin.php' : 'ajout_medecin.php';
+
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        data: formData,
+                        dataType: 'json',
+                        success: function(response) {
+                            if(response.status === 'success') {
+                                $('#medecinModal').modal('hide');
+                                refreshTable();
+                                alert(response.message);
+                            } else {
+                                alert('Erreur: ' + response.message);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Erreur:', xhr.responseText);
+                            alert('Erreur lors de l\'opération: ' + error);
+                        }
+                    });
+                } else {
+                    document.getElementById('medecin-form').reportValidity();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

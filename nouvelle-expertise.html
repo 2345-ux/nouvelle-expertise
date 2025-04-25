@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nouvelle Expertise - Expertise Médicale</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .required-field::after {
+            content: " *";
+            color: red;
+        }
+        .content-wrapper {
+            flex: 1 0 auto;
+            padding-top: 76px;
+        }
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        }
+        footer {
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Barre de navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">Expertise Médicale</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="nouvelle-expertise.html">Nouvelle Expertise</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="nouveau-medecin.html">Nouveau Médecin</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="nouveau-type-expertise.html">Nouveau Type d'Expertise</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="content-wrapper">
+        <div class="container">
+            <div class="expertise-header">
+                <h1>Gestion des Expertises</h1>
+                <div>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#expertiseModal">
+                        <i class="bi bi-plus-circle"></i> Nouvelle Expertise
+                    </button>
+                    <button class="btn btn-outline-primary" id="print-btn">
+                        <i class="bi bi-printer"></i> Imprimer
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Barre de recherche avancée -->
+            <div class="search-filters">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="search-victime" class="form-label">Rechercher par nom de victime</label>
+                            <input type="text" class="form-control" id="search-victime" placeholder="Nom de la victime">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="search-medecin" class="form-label">Rechercher par médecin</label>
+                            <select class="form-select" id="search-medecin">
+                                <option value="">Tous les médecins</option>
+                                <option value="Dr. Dupont">Dr. Dupont</option>
+                                <option value="Dr. Martin">Dr. Martin</option>
+                                <option value="Dr. Dubois">Dr. Dubois</option>
+                                <option value="Dr. Bernard">Dr. Bernard</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="search-date" class="form-label">Rechercher par date</label>
+                            <input type="date" class="form-control" id="search-date">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100" id="search-btn">
+                            <i class="bi bi-search"></i> Rechercher
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="text-end mt-2">
+                    <span class="advanced-search-toggle" id="toggle-advanced-search">
+                        <i class="bi bi-plus-circle me-1"></i> Recherche avancée
+                    </span>
+                </div>
+                
+                <div class="advanced-search" id="advanced-search">
+                    <div class="row mt-3">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="search-type-expertise" class="form-label">Type d'expertise</label>
+                                <select class="form-select" id="search-type-expertise">
+                                    <option value="">Tous les types</option>
+                                    <option value="Cardiologie">Cardiologie</option>
+                                    <option value="Neurologie">Neurologie</option>
+                                    <option value="Orthopédique">Orthopédique</option>
+                                    <option value="Psychiatrique">Psychiatrique</option>
+                                    <option value="Traumatologique">Traumatologique</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="search-provenance" class="form-label">Provenance</label>
+                                <input type="text" class="form-control" id="search-provenance" placeholder="Provenance">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="search-statut" class="form-label">Statut</label>
+                                <select class="form-select" id="search-statut">
+                                    <option value="">Tous les statuts</option>
+                                    <option value="Terminé">Terminé</option>
+                                    <option value="En cours">En cours</option>
+                                    <option value="Planifié">Planifié</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="search-date-fin" class="form-label">Date de fin</label>
+                                <input type="date" class="form-control" id="search-date-fin">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tableau des expertises -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover" id="expertises-table">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Date et Heure</th>
+                                    <th>Médecin</th>
+                                    <th>Victime</th>
+                                    <th>Âge</th>
+                                    <th>Provenance</th>
+                                    <th>N° Réquisition</th>
+                                    <th>Date Réq.</th>
+                                    <th>Type Réq.</th>
+                                    <th>Victime de</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Le corps du tableau sera rempli par DataTables -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour ajouter/modifier une expertise -->
+    <div class="modal fade" id="expertiseModal" tabindex="-1" aria-labelledby="expertiseModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="expertiseModalLabel">Nouvelle Expertise</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="expertise-form">
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label for="code-expertise" class="required-field">Code d'expertise</label>
+                                <input type="text" class="form-control" id="code-expertise" readonly value="EXP-2023-005">
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="date-expertise" class="required-field">Date et heure</label>
+                                <input type="text" class="form-control" id="date-expertise" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6 form-group">
+                                <label for="medecin" class="required-field">Médecin</label>
+                                <select class="form-select" id="medecin" required>
+                                    <option value="" selected disabled>Sélectionnez un médecin</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="type-expertise" class="required-field">Type d'expertise</label>
+                                <select class="form-select" id="type-expertise" required>
+                                    <option value="" selected disabled>Sélectionnez un type</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <hr class="my-3">
+                        
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label for="nom-victime" class="required-field">Nom de la victime</label>
+                                <input type="text" class="form-control" id="nom-victime" required>
+                            </div>
+                            <div class="col-md-3 form-group">
+                                <label for="age-victime" class="required-field">Âge</label>
+                                <input type="number" class="form-control" id="age-victime" min="0" max="120" required>
+                            </div>
+                            <div class="col-md-3 form-group">
+                                <label for="victime-de">Victime de</label>
+                                <input type="text" class="form-control" id="victime-de">
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6 form-group">
+                                <label for="provenance" class="required-field">Provenance</label>
+                                <input type="text" class="form-control" id="provenance" required>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="numero-requisition">Numéro de réquisition</label>
+                                <input type="text" class="form-control" id="numero-requisition">
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6 form-group">
+                                <label for="date-requisition">Date de réquisition</label>
+                                <input type="date" class="form-control" id="date-requisition">
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="type-requisition">Type de réquisition</label>
+                                <select class="form-select" id="type-requisition">
+                                    <option value="" selected disabled>Sélectionnez un type</option>
+                                    <option value="urgente">Urgente</option>
+                                    <option value="normale">Normale</option>
+                                    <option value="judiciaire">Judiciaire</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mt-3">
+                            <label for="consultation-examen">Consultation et Examens de laboratoire</label>
+                            <textarea class="form-control" id="consultation-examen" rows="5"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="button" class="btn btn-primary" id="save-expertise">Enregistrer</button>
+                    <button type="button" class="btn btn-outline-primary" id="print-expertise">
+                        <i class="bi bi-printer"></i> Imprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmation de suppression -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmer la suppression</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer cette expertise ?</p>
+                    <p class="text-danger">Cette action est irréversible.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-danger" id="confirm-delete">Supprimer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Expertise Médicale</h5>
+                    <p>Application de gestion des expertises médicales</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>&copy; 2023 Expertise Médicale. Tous droits réservés.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Charger la liste des médecins au démarrage
+            function loadMedecins() {
+                $.ajax({
+                    url: 'liste_medecin.php',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            const select = $('#medecin');
+                            select.empty();
+                            select.append('<option value="" selected disabled>Sélectionnez un médecin</option>');
+                            
+                            response.medecins.forEach(function(medecin) {
+                                select.append(`<option value="${medecin.code}">Dr. ${medecin.nom}</option>`);
+                            });
+                        } else {
+                            console.error('Erreur lors du chargement des médecins:', response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Erreur AJAX:', error);
+                    }
+                });
+            }
+
+            // Charger les médecins au démarrage
+            loadMedecins();
+
+            // Recharger les médecins à l'ouverture du modal
+            $('#expertiseModal').on('show.bs.modal', function() {
+                loadMedecins();
+            });
+            
+            // Initialiser DataTables pour le tableau avec chargement AJAX
+            var expertisesTable = $('#expertises-table').DataTable({
+                ajax: {
+                    url: 'liste_expertise.php',
+                    dataSrc: 'expertises'
+                },
+                columns: [
+                    { data: 'code_expertise' },
+                    { 
+                        data: 'date_heure',
+                        render: function(data) {
+                            return new Date(data).toLocaleString('fr-FR');
+                        }
+                    },
+                    { 
+                        data: 'nom_medecin',
+                        render: function(data, type, row) {
+                            const prefix = row.sexe_medecin === 'F' ? 'Dr.' : 'Dr.';
+                            return prefix + ' ' + data;
+                        }
+                    },
+                    { data: 'nom_victime' },
+                    { data: 'age_victime' },
+                    { data: 'provenance' },
+                    { data: 'numero_requisition' },
+                    { 
+                        data: 'date_requisition',
+                        render: function(data) {
+                            return data ? new Date(data).toLocaleDateString('fr-FR') : '';
+                        }
+                    },
+                    { 
+                        data: 'type_requisition',
+                        render: function(data) {
+                            let badge = '';
+                            switch(data) {
+                                case 'urgente':
+                                    badge = 'bg-danger';
+                                    break;
+                                case 'normale':
+                                    badge = 'bg-success';
+                                    break;
+                                default:
+                                    badge = 'bg-secondary';
+                            }
+                            return `<span class="badge ${badge}">${data}</span>`;
+                        }
+                    },
+                    { data: 'victime_de' },
+                    {
+                        data: 'code_expertise',
+                        render: function(data, type, row) {
+                            return `
+                                <button class="btn btn-sm btn-primary btn-action edit-btn" data-id="${data}" 
+                                        title="Consultation: ${row.consultation_examen || 'Aucune'}">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger btn-action delete-btn" data-id="${data}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            `;
+                        }
+                    }
+                ],
+                scrollX: true,
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/fr-FR.json'
+                },
+                pageLength: 10,
+                responsive: true,
+                dom: 't<"d-flex justify-content-between"ip>'
+            });
+
+            // Fonction pour rafraîchir le tableau
+            function refreshTable() {
+                expertisesTable.ajax.reload();
+            }
+
+            // Après un ajout/modification/suppression réussi
+            function handleSuccess() {
+                refreshTable();
+            }
+
+            // Modifier le gestionnaire d'événements save-expertise
+            $('#save-expertise').on('click', function() {
+                if(document.getElementById('expertise-form').checkValidity()) {
+                    const formData = {
+                        medecin_id: $('#medecin').val(),
+                        nom_victime: $('#nom-victime').val(),
+                        age_victime: $('#age-victime').val(),
+                        provenance: $('#provenance').val(),
+                        type_requisition: $('#type-expertise').val(),
+                        numero_requisition: $('#numero-requisition').val() || null,
+                        date_requisition: $('#date-requisition').val() || null,
+                        victime_de: $('#victime-de').val() || null,
+                        consultation_examen: $('#consultation-examen').val() || null,
+                        code_expertise: $('#code-expertise').val()
+                    };
+
+                    // Debug console log
+                    console.log('Données à envoyer:', formData);
+
+                    $.ajax({
+                        url: 'ajout_expertise.php',
+                        type: 'POST',
+                        data: formData,
+                        dataType: 'json',
+                        success: function(response) {
+                            console.log('Réponse:', response);
+                            if(response.status === 'success') {
+                                $('#expertiseModal').modal('hide');
+                                refreshTable();
+                                alert(response.message);
+                            } else {
+                                alert('Erreur: ' + response.message);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Erreur complète:', xhr.responseText);
+                            const response = JSON.parse(xhr.responseText);
+                            alert('Erreur: ' + (response.message || error));
+                        }
+                    });
+                } else {
+                    document.getElementById('expertise-form').reportValidity();
+                }
+            });
+
+            // Gérer l'affichage de la recherche avancée
+            $('#toggle-advanced-search').on('click', function() {
+                $('#advanced-search').slideToggle(300);
+                $(this).find('i').toggleClass('bi-plus-circle bi-dash-circle');
+                
+                if($(this).find('i').hasClass('bi-dash-circle')) {
+                    $(this).html('<i class="bi bi-dash-circle me-1"></i> Masquer la recherche avancée');
+                } else {
+                    $(this).html('<i class="bi bi-plus-circle me-1"></i> Recherche avancée');
+                }
+            });
+            
+            // Recherche personnalisée
+            $('#search-btn').on('click', function() {
+                applySearch();
+            });
+            
+            // Appliquer la recherche sur les champs "Enter"
+            $('#search-victime, #search-date, #search-provenance').on('keypress', function(e) {
+                if(e.which === 13) {
+                    applySearch();
+                }
+            });
+            
+            // Appliquer les filtres de recherche
+            function applySearch() {
+                expertisesTable.search('').columns().search('').draw();
+                
+                var victim = $('#search-victime').val();
+                var doctor = $('#search-medecin').val();
+                var date = $('#search-date').val();
+                var type = $('#search-type-expertise').val();
+                var provenance = $('#search-provenance').val();
+                var statut = $('#search-statut').val();
+                
+                // Recherche par victime (colonne 3)
+                if(victim) {
+                    expertisesTable.column(3).search(victim, true, false).draw();
+                }
+                
+                // Recherche par médecin (colonne 2)
+                if(doctor) {
+                    expertisesTable.column(2).search(doctor, true, false).draw();
+                }
+                
+                // Recherche par date (colonne 1)
+                if(date) {
+                    var formattedDate = formatDate(date);
+                    expertisesTable.column(1).search(formattedDate, true, false).draw();
+                }
+                
+                // Recherches avancées
+                if(type) {
+                    expertisesTable.column(5).search(type, true, false).draw();
+                }
+                
+                if(provenance) {
+                    expertisesTable.column(6).search(provenance, true, false).draw();
+                }
+                
+                if(statut) {
+                    expertisesTable.column(7).search(statut, true, false).draw();
+                }
+            }
+            
+            // Convertir format date YYYY-MM-DD en DD/MM/YYYY pour la recherche
+            function formatDate(inputDate) {
+                var parts = inputDate.split('-');
+                return parts[2] + '/' + parts[1] + '/' + parts[0];
+            }
+            
+            // Définir la date et l'heure actuelles automatiquement
+            function setCurrentDateTime() {
+                const now = new Date();
+                const formattedDateTime = now.toLocaleString('fr-FR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                $('#date-expertise').val(formattedDateTime);
+            }
+            
+            // Lors de l'ouverture du modal, définir la date
+            $('#expertiseModal').on('shown.bs.modal', function() {
+                setCurrentDateTime();
+            });
+            
+            // Gérer le clic sur le bouton Modifier
+            $(document).on('click', '.edit-btn', function() {
+                const expertiseId = $(this).data('id');
+                
+                // Charger les données de l'expertise
+                $.ajax({
+                    url: 'get_expertise.php',
+                    type: 'GET',
+                    data: { code_expertise: expertiseId },
+                    dataType: 'json',
+                    success: function(response) {
+                        if(response.status === 'success') {
+                            const expertise = response.expertise;
+                            
+                            // Remplir le formulaire
+                            $('#expertiseModalLabel').text('Modifier Expertise');
+                            $('#code-expertise').val(expertise.code_expertise);
+                            $('#medecin').val(expertise.medecin_id);
+                            $('#nom-victime').val(expertise.nom_victime);
+                            $('#age-victime').val(expertise.age_victime);
+                            $('#provenance').val(expertise.provenance);
+                            $('#numero-requisition').val(expertise.numero_requisition);
+                            $('#date-requisition').val(expertise.date_requisition);
+                            $('#type-requisition').val(expertise.type_requisition);
+                            $('#victime-de').val(expertise.victime_de);
+                            $('#consultation-examen').val(expertise.consultation_examen);
+                            $('#type-expertise').val(expertise.type_expertise_id);
+                            
+                            // Ouvrir le modal
+                            $('#expertiseModal').modal('show');
+                        } else {
+                            alert('Erreur: ' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Erreur lors du chargement des données: ' + error);
+                    }
+                });
+            });
+
+            // Modifier le gestionnaire save-expertise pour gérer aussi les modifications
+            $('#save-expertise').on('click', function() {
+                if(document.getElementById('expertise-form').checkValidity()) {
+                    const formData = {
+                        medecin_id: $('#medecin').val(),
+                        nom_victime: $('#nom-victime').val(),
+                        age_victime: $('#age-victime').val(),
+                        provenance: $('#provenance').val(),
+                        type_expertise_id: $('#type-expertise').val(),
+                        numero_requisition: $('#numero-requisition').val() || null,
+                        date_requisition: $('#date-requisition').val() || null,
+                        type_requisition: $('#type-requisition').val(),
+                        victime_de: $('#victime-de').val() || null,
+                        consultation_examen: $('#consultation-examen').val() || null,
+                        code_expertise: $('#code-expertise').val()
+                    };
+
+                    const isModification = $('#expertiseModalLabel').text() === 'Modifier Expertise';
+                    const url = isModification ? 'modifier_expertise.php' : 'ajout_expertise.php';
+
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        data: formData,
+                        dataType: 'json',
+                        success: function(response) {
+                            if(response.status === 'success') {
+                                $('#expertiseModal').modal('hide');
+                                refreshTable();
+                                alert(response.message);
+                            } else {
+                                alert('Erreur: ' + response.message);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            alert('Erreur: ' + error);
+                        }
+                    });
+                } else {
+                    document.getElementById('expertise-form').reportValidity();
+                }
+            });
+
+            // Gérer le clic sur le bouton Supprimer
+            $('.delete-btn').on('click', function() {
+                const expertiseId = $(this).data('id');
+                // Stocker l'ID pour utilisation future
+                $('#deleteConfirmModal').data('expertise-id', expertiseId);
+                // Ouvrir le modal de confirmation
+                $('#deleteConfirmModal').modal('show');
+            });
+            
+            // Confirmer la suppression
+            $('#confirm-delete').on('click', function() {
+                const expertiseId = $('#deleteConfirmModal').data('expertise-id');
+                // Dans une application réelle, ici on enverrait une requête DELETE à une API
+                console.log('Supprimer expertise:', expertiseId);
+                
+                // Simuler une suppression réussie
+                alert('Expertise ' + expertiseId + ' supprimée avec succès');
+                $('#deleteConfirmModal').modal('hide');
+                
+                // En situation réelle, on rechargerait le tableau ou supprimerait la ligne concernée
+            });
+            
+            // Gérer le clic sur le bouton Imprimer (modal)
+            $('#print-expertise').on('click', function() {
+                // Dans une application réelle, on préparerait une mise en page pour impression
+                alert('Impression de l\'expertise...');
+                // window.print() ou redirection vers une page d'impression
+            });
+            
+            // Gérer le clic sur le bouton Imprimer (tableau)
+            $('#print-btn').on('click', function() {
+                // Dans une application réelle, on préparerait une mise en page pour impression
+                alert('Impression de la liste des expertises...');
+                // window.print() ou redirection vers une page d'impression
+            });
+
+            // Fonction pour charger les types d'expertise
+            function loadTypesExpertise() {
+                $.ajax({
+                    url: 'liste_type_expertises.php',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            const select = $('#type-expertise');
+                            select.empty();
+                            select.append('<option value="" selected disabled>Sélectionnez un type</option>');
+                            
+                            response.types.forEach(function(type) {
+                                select.append(`<option value="${type.id}">${type.nom_type}</option>`);
+                            });
+                        } else {
+                            console.error('Erreur lors du chargement des types d\'expertise:', response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Erreur AJAX:', error);
+                    }
+                });
+            }
+
+            // Charger les types d'expertise au démarrage
+            loadTypesExpertise();
+
+            // Recharger les types d'expertise à l'ouverture du modal
+            $('#expertiseModal').on('show.bs.modal', function() {
+                loadTypesExpertise();
+            });
+        });
+    </script>
+</body>
+</html>
