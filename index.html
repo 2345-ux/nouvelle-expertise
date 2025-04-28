@@ -182,7 +182,7 @@
         <!-- Tableau des expertises récentes -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card">
+                <div class="card" id="recent-expertises">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">Expertises récentes</h5>
                         <a href="toutes-expertises.html" class="btn btn-sm btn-outline-primary">Voir tout</a>
@@ -321,15 +321,15 @@
             }
         });
 
-        // Données pour le graphique linéaire
+        // Remplacer la partie du graphique linéaire par :
         const lineCtx = document.getElementById('expertise-line-chart').getContext('2d');
         const lineChart = new Chart(lineCtx, {
             type: 'line',
             data: {
-                labels: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin'],
+                labels: [],
                 datasets: [{
                     label: 'Nombre d\'expertises',
-                    data: [15, 22, 18, 24, 32, 41],
+                    data: [],
                     backgroundColor: 'rgba(75, 192, 192, 0.2)',
                     borderColor: 'rgba(75, 192, 192, 1)',
                     borderWidth: 2,
@@ -341,10 +341,109 @@
                 maintainAspectRatio: false,
                 scales: {
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    legend: {
+                        display: true,
+                        position: 'top'
                     }
                 }
             }
+        });
+
+        // Charger les statistiques
+        function loadStats() {
+            // Charger le nombre total d'expertises
+            fetch('count_expertises.php')
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        document.getElementById('total-expertises').textContent = data.data.total;
+                        
+                        // Mettre à jour le graphique en camembert
+                        const typeData = data.data.par_type;
+                        pieChart.data.labels = typeData.map(item => item.type_requisition);
+                        pieChart.data.datasets[0].data = typeData.map(item => item.count);
+                        pieChart.update();
+                    }
+                })
+                .catch(error => console.error('Erreur:', error));
+
+            // Charger le nombre de catégories
+            fetch('count_categories.php')
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        document.getElementById('categories-count').textContent = data.data.total;
+                    }
+                })
+                .catch(error => console.error('Erreur:', error));
+        }
+
+        // Fonction pour charger les expertises récentes
+        function loadRecentExpertises() {
+            fetch('recentes_expertises.php')
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        const tbody = document.querySelector('#recent-expertises tbody');
+                        tbody.innerHTML = '';
+                        
+                        data.expertises.forEach(expertise => {
+                            const badgeClass = expertise.statut === 'Terminé' ? 'bg-success' : 
+                                             expertise.statut === 'Planifié' ? 'bg-secondary' : 
+                                             'bg-warning text-dark';
+                            
+                            tbody.innerHTML += `
+                                <tr>
+                                    <td>${expertise.code_expertise}</td>
+                                    <td>${expertise.date_formatee}</td>
+                                    <td>${expertise.nom_victime}</td>
+                                    <td>${expertise.type_requisition}</td>
+                                    <td>${expertise.medecin_formate}</td>
+                                    <td><span class="badge ${badgeClass}">${expertise.statut}</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" 
+                                                onclick="window.location.href='nouvelle-expertise.html?id=${expertise.code_expertise}'">
+                                            Détails
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                    }
+                })
+                .catch(error => console.error('Erreur:', error));
+        }
+
+        // Ajouter cette fonction pour charger l'évolution
+        function loadEvolution() {
+            fetch('evolution_expertises.php')
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        lineChart.data.labels = data.data.labels;
+                        lineChart.data.datasets[0].data = data.data.values;
+                        lineChart.update();
+                    }
+                })
+                .catch(error => console.error('Erreur:', error));
+        }
+
+        // Charger les statistiques et les expertises récentes au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStats();
+            loadRecentExpertises();
+            loadEvolution();
         });
 
         // Gestionnaires d'événements pour les filtres
