@@ -1,8 +1,19 @@
 <?php
-// supprimer_expertise.php
 header('Content-Type: application/json');
 
+// Activer l'affichage détaillé des erreurs
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 try {
+    // Récupération du code d'expertise à supprimer
+    $code_expertise = $_POST['code_expertise'] ?? null;
+    
+    if (!$code_expertise) {
+        throw new Exception("Le code d'expertise est obligatoire pour la suppression");
+    }
+
     // Connexion à la base de données
     $pdo = new PDO(
         "mysql:host=localhost;dbname=expertise_medicale;charset=utf8",
@@ -10,63 +21,40 @@ try {
         "saw24",
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
-    
-    // Récupération du code de l'expertise à supprimer
-    $code_expertise = $_POST['code_expertise'] ?? '';
-    
-    // Vérification du code
-    if (empty($code_expertise)) {
-        throw new Exception("Le code d'expertise est obligatoire.");
+
+    // Préparation et exécution de la requête de suppression
+    $stmt = $pdo->prepare("DELETE FROM t_expertises WHERE code_expertise = ?");
+    $result = $stmt->execute([$code_expertise]);
+
+    if (!$result) {
+        error_log("Erreur SQL: " . print_r($stmt->errorInfo(), true));
+        throw new Exception("Erreur de suppression en base de données");
     }
-    
-    // Vérification de l'existence de l'expertise
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM t_expertises WHERE code_expertise = :code_expertise");
-    $stmt->execute([':code_expertise' => $code_expertise]);
-    if ($stmt->fetchColumn() == 0) {
-        throw new Exception("Cette expertise n'existe pas.");
+
+    // Vérifier si l'expertise a été trouvée et supprimée
+    if ($stmt->rowCount() === 0) {
+        throw new Exception("Aucune expertise trouvée avec le code: $code_expertise");
     }
-    
-    // Début d'une transaction pour garantir l'intégrité des données
-    $pdo->beginTransaction();
-    
-    // Suppression des relations éventuelles (si vous avez des tables liées)
-    // Exemple: $stmt = $pdo->prepare("DELETE FROM t_details_expertise WHERE expertise_id = :code_expertise");
-    // $stmt->execute([':code_expertise' => $code_expertise]);
-    
-    // Suppression de l'expertise
-    $stmt = $pdo->prepare("DELETE FROM t_expertises WHERE code_expertise = :code_expertise");
-    $stmt->execute([':code_expertise' => $code_expertise]);
-    
-    // Validation de la transaction
-    $pdo->commit();
-    
-    // Réponse en cas de succès
+
     echo json_encode([
         'status' => 'success',
-        'message' => 'Expertise médicale supprimée avec succès !'
+        'message' => 'Expertise supprimée avec succès'
     ]);
-    
-} catch (PDOException $e) {
-    // Annulation de la transaction en cas d'erreur
-    if ($pdo->inTransaction()) {
-        $pdo->rollback();
-    }
-    
-    // Réponse en cas d'erreur de base de données
-    echo json_encode([
-        'status' => 'error',
-        'message' => 'Erreur de base de données: ' . $e->getMessage()
-    ]);
+
 } catch (Exception $e) {
-    // Annulation de la transaction en cas d'erreur
-    if (isset($pdo) && $pdo->inTransaction()) {
-        $pdo->rollback();
-    }
-    
-    // Réponse en cas d'erreur générale
+    error_log("Exception: " . $e->getMessage());
+    http_response_code(400);
     echo json_encode([
         'status' => 'error',
         'message' => $e->getMessage()
+    ]);
+} catch (PDOException $e) {
+    // Réponse en cas d'erreur de base de données
+    error_log("PDOException: " . $e->getMessage());
+    http_response_code(500);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Erreur de base de données: ' . $e->getMessage()
     ]);
 }
 ?>

@@ -16,10 +16,11 @@ try {
     $date_debut = isset($_GET['date_debut']) ? $_GET['date_debut'] : '';
     $date_fin = isset($_GET['date_fin']) ? $_GET['date_fin'] : '';
     $type_expertise = isset($_GET['type_expertise']) ? $_GET['type_expertise'] : '';
+    $code_expertise = isset($_GET['code_expertise']) ? $_GET['code_expertise'] : '';
 
     // Construction de la requête SQL de base
     $sql = "
-        SELECT 
+   SELECT 
             e.code_expertise,
             e.date_heure,
             e.nom_victime,
@@ -28,19 +29,28 @@ try {
             e.numero_requisition,
             e.date_requisition,
             e.type_requisition,
-            e.victime_de,
+            e.victime_de_id,
             e.consultation_examen,
             m.nom AS nom_medecin,
-            m.sexe AS sexe_medecin
+            m.sexe AS sexe_medecin,
+            te.nom_type AS nom_victime_de
         FROM 
             t_expertises e
         LEFT JOIN 
             t_medecins m ON e.medecin_id = m.code
+        LEFT JOIN
+            t_types_expertise te ON e.victime_de_id = te.code_type
     ";
 
     // Ajout des conditions de filtrage si nécessaire
     $conditions = [];
     $params = [];
+
+    if (!empty($code_expertise)) {
+        // Si un code d'expertise spécifique est demandé
+        $conditions[] = "e.code_expertise = :code_expertise";
+        $params[':code_expertise'] = $code_expertise;
+    }
 
     if (!empty($recherche)) {
         $conditions[] = "(e.code_expertise LIKE :recherche 
@@ -101,6 +111,21 @@ try {
             $expertise['age_victime_formatee'] = $expertise['age_victime'] . ' ans';
         } else {
             $expertise['age_victime_formatee'] = $expertise['age_victime'];
+        }
+        
+        // Si nom_victime_de est NULL, afficher une valeur par défaut ou le code
+        if (empty($expertise['nom_victime_de']) && !empty($expertise['victime_de_id'])) {
+            // Essai de récupérer le nom du type d'expertise directement
+            $stmt = $pdo->prepare("SELECT nom_type FROM t_types_expertise WHERE code_type = ?");
+            $stmt->execute([$expertise['victime_de_id']]);
+            $nom_type = $stmt->fetchColumn();
+            
+            if ($nom_type) {
+                $expertise['nom_victime_de'] = $nom_type;
+            } else {
+                // Si on ne trouve pas le nom, utiliser l'ID comme fallback
+                $expertise['nom_victime_de'] = 'Type ' . $expertise['victime_de_id'];
+            }
         }
     }
 

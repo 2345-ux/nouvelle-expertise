@@ -13,24 +13,18 @@ try {
         ]
     );
 
-    // Requête SQL simple pour commencer
-    $sql = "SELECT * FROM t_types_expertise ORDER BY nom_type ASC";
+    // Requête SQL pour récupérer les types de victimes
+    $sql = "SELECT * FROM t_types_victimes ORDER BY nom_type_victime ASC";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
 
     // Récupérer les résultats
-    $types = $stmt->fetchAll();
-    
-    // Log des données pour debug
-    error_log("Types d'expertise récupérés: " . print_r($types, true));
-    
-    // Note importante: On utilise directement le champ code_type sans créer de champ 'id' supplémentaire
-    // Cela garantit la compatibilité avec le formulaire qui envoie cette valeur à ajout_expertise.php
+    $types_victimes = $stmt->fetchAll();
 
     // Envoyer la réponse
     echo json_encode([
         'status' => 'success',
-        'types' => $types
+        'types_victimes' => $types_victimes
     ]);
 
 } catch (PDOException $e) {

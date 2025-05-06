@@ -17,11 +17,14 @@ try {
         SELECT 
             e.*,
             m.nom AS nom_medecin,
-            m.sexe AS sexe_medecin
+            m.sexe AS sexe_medecin,
+            te.nom_type AS nom_type_expertise
         FROM 
             t_expertises e
         LEFT JOIN 
             t_medecins m ON e.medecin_id = m.code
+        LEFT JOIN
+            t_types_expertise te ON e.victime_de_id = te.code_type
         WHERE 
             e.code_expertise = :code_expertise
     ");
