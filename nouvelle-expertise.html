@@ -623,97 +623,121 @@
                 $('#date-expertise').val(formattedDateTime);
             }
             
-            // Gérer le clic sur le bouton Modifier
-            $(document).on('click', '.edit-btn', function(e) {
-                e.preventDefault(); // Empêcher tout comportement par défaut
-                const expertiseId = $(this).data('id');
+          // Gérer le clic sur le bouton Modifier
+          $(document).on('click', '.edit-btn', function(e) {
+    e.preventDefault();
+    const expertiseId = $(this).data('id');
+    
+    // Afficher un message de chargement
+    console.log("Chargement de l'expertise ID:", expertiseId);
+    
+    // Requête AJAX pour récupérer les détails de l'expertise
+    $.ajax({
+        url: 'liste_expertise.php',
+        type: 'GET',
+        data: { code_expertise: expertiseId },
+        dataType: 'json',
+        success: function(response) {
+            console.log("Réponse de l'API:", response);
+            
+            if(response.status === 'success' && response.expertises && response.expertises.length > 0) {
+                // Prendre la première expertise du tableau
+                const expertise = response.expertises[0];
                 
-                // NE PAS ouvrir le modal ici, attendez d'abord que les données soient chargées
+                // Modifiez le titre du modal
+                $('#expertiseModalLabel').text('Modifier Expertise');
                 
-                // Utiliser liste_expertise.php au lieu de get_expertise.php
-                $.ajax({
-                    url: 'liste_expertise.php',
-                    type: 'GET',
-                    data: { code_expertise: expertiseId },
-                    dataType: 'json',
-                    success: function(response) {
-                        if(response.status === 'success' && response.expertises && response.expertises.length > 0) {
-                            // Récupérer la première expertise correspondante
-                            const expertise = response.expertises.find(exp => exp.code_expertise === expertiseId) || response.expertises[0];
-                            
-                            // S'assurer que les listes déroulantes sont chargées d'abord
-                            $.when(
-                                // Charger les médecins
-                                $.ajax({
-                                    url: 'liste_medecin.php',
-                                    type: 'GET',
-                                    dataType: 'json'
-                                }),
-                                // Charger les types de victimes
-                                $.ajax({
-                                    url: 'liste_type_expertises.php',
-                                    type: 'GET',
-                                    dataType: 'json'
-                                })
-                            ).then(function(medecinResponse, victimeResponse) {
-                                // Modifiez le titre du modal
-                                $('#expertiseModalLabel').text('Modifier Expertise');
-                                
-                                // Remplir les listes déroulantes
-                                if (medecinResponse[0].status === 'success') {
-                                    const select = $('#medecin');
-                                    select.empty();
-                                    select.append('<option value="" selected disabled>Sélectionnez un médecin</option>');
-                                    
-                                    medecinResponse[0].medecins.forEach(function(medecin) {
-                                        select.append(`<option value="${medecin.code}">Dr. ${medecin.nom}</option>`);
-                                    });
-                                }
-                                
-                                if (victimeResponse[0].status === 'success') {
-                                    const select = $('#victime-de');
-                                    select.empty();
-                                    select.append('<option value="" selected disabled>Sélectionnez un type</option>');
-                                    
-                                    victimeResponse[0].types.forEach(function(type) {
-                                        select.append(`<option value="${type.code_type}">${type.nom_type}</option>`);
-                                    });
-                                }
-                                
-                                // Maintenant, remplir le formulaire avec les données de l'expertise
-                                $('#code-expertise').val(expertise.code_expertise);
-                                $('#date-expertise').val(expertise.date_heure ? new Date(expertise.date_heure).toLocaleString('fr-FR') : '');
-                                $('#medecin').val(expertise.medecin_id);
-                                $('#nom-victime').val(expertise.nom_victime);
-                                $('#age-victime').val(expertise.age_victime);
-                                $('#provenance').val(expertise.provenance);
-                                $('#numero-requisition').val(expertise.numero_requisition);
-                                $('#date-requisition').val(expertise.date_requisition);
-                                $('#type-requisition').val(expertise.type_requisition);
-                                $('#victime-de').val(expertise.victime_de_id);
-                                
-                                // Vérifier si TinyMCE est initialisé
-                                if (tinymce.get('consultation-examen')) {
-                                    tinymce.get('consultation-examen').setContent(expertise.consultation_examen || '');
-                                } else {
-                                    // Si TinyMCE n'est pas encore initialisé, attendre un peu
-                                    setTimeout(function() {
-                                        tinymce.get('consultation-examen').setContent(expertise.consultation_examen || '');
-                                    }, 500);
-                                }
-                                
-                                // Ouvrir le modal APRÈS avoir chargé toutes les données
-                                $('#expertiseModal').modal('show');
-                            });
-                        } else {
-                            alert('Erreur: Expertise non trouvée');
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        alert('Erreur lors du chargement des données: ' + error);
+                // Charger les listes déroulantes avant de définir les valeurs
+                loadMedecins();
+                loadVictimeDe();
+                
+                // Remplir le formulaire avec les données de l'expertise après un court délai
+                // pour permettre aux listes déroulantes de se charger
+                setTimeout(function() {
+                    // Remplir le formulaire avec les données de l'expertise
+                    $('#code-expertise').val(expertise.code_expertise);
+                    
+                    // Formater la date et l'heure
+                    if (expertise.date_heure) {
+                        $('#date-expertise').val(expertise.date_heure_formatee || expertise.date_heure);
                     }
-                });
-            });
+                    
+                    // Définir les valeurs des select
+                    $('#medecin').val(expertise.medecin_id);
+                    $('#victime-de').val(expertise.victime_de_id);
+                    
+                    // Définir les valeurs des autres champs
+                    $('#nom-victime').val(expertise.nom_victime);
+                    $('#age-victime').val(expertise.age_victime);
+                    $('#provenance').val(expertise.provenance);
+                    $('#numero-requisition').val(expertise.numero_requisition || '');
+                    
+                    if (expertise.date_requisition) {
+                        // Convertir le format de date si nécessaire
+                        const dateParts = expertise.date_requisition.split('/');
+                        if (dateParts.length === 3) {
+                            $('#date-requisition').val(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
+                        } else {
+                            $('#date-requisition').val(expertise.date_requisition);
+                        }
+                    }
+                    
+                    $('#type-requisition').val(expertise.type_requisition || '');
+                    
+                    // Gérer le contenu de l'éditeur TinyMCE
+                    if (tinymce.get('consultation-examen')) {
+                        tinymce.get('consultation-examen').setContent(expertise.consultation_examen || '');
+                    } else {
+                        // Dans le cas où TinyMCE n'est pas initialisé
+                        tinymce.init({
+                            selector: '#consultation-examen',
+                            height: 400,
+                            plugins: [
+                                'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'image', 
+                                'link', 'lists', 'media', 'searchreplace', 'table', 'visualblocks', 
+                                'wordcount', 'checklist', 'mediaembed', 'casechange', 'formatpainter', 
+                                'pageembed', 'a11ychecker', 'tinymcespellchecker', 'permanentpen', 
+                                'powerpaste', 'advtable', 'advcode', 'editimage', 'advtemplate', 
+                                'ai', 'mentions', 'tinycomments', 'tableofcontents', 'footnotes', 
+                                'mergetags', 'autocorrect', 'typography', 'inlinecss', 'markdown',
+                                'importword', 'exportword', 'exportpdf'
+                            ],
+                            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | ' +
+                                    'link image media table mergetags | addcomment showcomments | ' +
+                                    'spellcheckdialog a11ycheck typography | align lineheight | ' +
+                                    'checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+                            language: 'fr_FR',
+                            content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+                            setup: function(editor) {
+                                editor.on('init', function() {
+                                    editor.setContent(expertise.consultation_examen || '');
+                                });
+                            }
+                        });
+                    }
+                    
+                    // Afficher des logs pour déboguer
+                    console.log("Valeurs définies dans le formulaire:");
+                    console.log("Médecin:", $('#medecin').val());
+                    console.log("Victime de:", $('#victime-de').val());
+                    console.log("Type requisition:", $('#type-requisition').val());
+                    
+                }, 500); // Délai de 500ms pour s'assurer que les listes déroulantes sont chargées
+                
+                // Ouvrir le modal
+                $('#expertiseModal').modal('show');
+                
+            } else {
+                console.error("Erreur: Expertise non trouvée ou format de réponse incorrect");
+                alert('Erreur: Impossible de charger les données de l\'expertise.');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Erreur AJAX:", xhr, status, error);
+            alert('Erreur lors du chargement des données: ' + error);
+        }
+    });
+});
 
             // Gérer le bouton Supprimer
             $(document).on('click', '.delete-btn', function() {

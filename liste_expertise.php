@@ -19,8 +19,7 @@ try {
     $code_expertise = isset($_GET['code_expertise']) ? $_GET['code_expertise'] : '';
 
     // Construction de la requête SQL de base
-    $sql = "
-   SELECT 
+    $sql = "SELECT 
             e.code_expertise,
             e.date_heure,
             e.nom_victime,
@@ -31,6 +30,7 @@ try {
             e.type_requisition,
             e.victime_de_id,
             e.consultation_examen,
+            e.medecin_id,
             m.nom AS nom_medecin,
             m.sexe AS sexe_medecin,
             te.nom_type AS nom_victime_de
@@ -39,8 +39,28 @@ try {
         LEFT JOIN 
             t_medecins m ON e.medecin_id = m.code
         LEFT JOIN
-            t_types_expertise te ON e.victime_de_id = te.code_type
-    ";
+            t_types_expertise te ON e.victime_de_id = te.code_type";
+
+    // Si un code_expertise spécifique est demandé
+    if (!empty($_GET['code_expertise'])) {
+        $sql .= " WHERE e.code_expertise = :code_expertise";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([':code_expertise' => $_GET['code_expertise']]);
+        $expertises = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        if (!empty($expertises)) {
+            echo json_encode([
+                'status' => 'success',
+                'expertises' => $expertises
+            ]);
+        } else {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Expertise non trouvée'
+            ]);
+        }
+        exit;
+    }
 
     // Ajout des conditions de filtrage si nécessaire
     $conditions = [];
