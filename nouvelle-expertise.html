@@ -201,7 +201,7 @@
                         <div class="row">
                             <div class="col-md-6 form-group">
                                 <label for="code-expertise" class="required-field">Code d'expertise</label>
-                                <input type="text" class="form-control" id="code-expertise" readonly value="EXP-2023-005">
+                                <input type="text" class="form-control" id="code-expertise" readonly>
                             </div>
                             <div class="col-md-6 form-group">
                                 <label for="date-expertise" class="required-field">Date et heure</label>
@@ -362,52 +362,62 @@
         $(document).ready(function() {
             // Charger la liste des médecins au démarrage
             
-            function loadMedecins() {
-                $.ajax({
-                    url: 'liste_medecin.php',
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.status === 'success') {
-                            const select = $('#medecin');
-                            select.empty();
-                            select.append('<option value="" selected disabled>Sélectionnez un médecin</option>');
-                            
-                            response.medecins.forEach(function(medecin) {
-                                select.append(`<option value="${medecin.code}">Dr. ${medecin.nom}</option>`);
-                            });
-                        } else {
-                            console.error('Erreur lors du chargement des médecins:', response.message);
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Erreur AJAX:', error);
-                    }
+            function loadMedecins(selectedValue = null) {
+                return new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: 'liste_medecin.php',
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.status === 'success') {
+                                const select = $('#medecin');
+                                select.empty();
+                                select.append('<option value="" selected disabled>Sélectionnez un médecin</option>');
+                                
+                                response.medecins.forEach(function(medecin) {
+                                    select.append(`<option value="${medecin.code}">Dr. ${medecin.nom}</option>`);
+                                });
+                                
+                                if (selectedValue) {
+                                    select.val(selectedValue);
+                                }
+                                resolve();
+                            } else {
+                                reject(response.message);
+                            }
+                        },
+                        error: reject
+                    });
                 });
             }
 
             // Fonction pour charger les types d'expertise dans le champ "victime de"
-            function loadVictimeDe() {
-                $.ajax({
-                    url: 'liste_type_expertises.php',
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.status === 'success') {
-                            const select = $('#victime-de');
-                            select.empty();
-                            select.append('<option value="" selected disabled>Sélectionnez un type</option>');
-                            
-                            response.types.forEach(function(type) {
-                                select.append(`<option value="${type.code_type}">${type.nom_type}</option>`);
-                            });
-                        } else {
-                            console.error('Erreur lors du chargement des types d\'expertise:', response.message);
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Erreur AJAX:', error);
-                    }
+            function loadVictimeDe(selectedValue = null) {
+                return new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: 'liste_type_expertises.php',
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.status === 'success') {
+                                const select = $('#victime-de');
+                                select.empty();
+                                select.append('<option value="" selected disabled>Sélectionnez un type</option>');
+                                
+                                response.types.forEach(function(type) {
+                                    select.append(`<option value="${type.code_type}">${type.nom_type}</option>`);
+                                });
+                                
+                                if (selectedValue) {
+                                    select.val(selectedValue);
+                                }
+                                resolve();
+                            } else {
+                                reject(response.message);
+                            }
+                        },
+                        error: reject
+                    });
                 });
             }
 
@@ -416,32 +426,35 @@
             loadVictimeDe();
 
             // Fonction pour réinitialiser le formulaire
-            function resetForm() {
-                $('#expertiseModalLabel').text('Nouvelle Expertise');
+            function resetForm(isNew = true) {
+                $('#expertiseModalLabel').text(isNew ? 'Nouvelle Expertise' : 'Modifier Expertise');
                 $('#expertise-form')[0].reset();
-                $('#code-expertise').val('EXP-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + Math.floor(Math.random() * 900 + 100));
                 setCurrentDateTime();
+                
                 if(tinymce.get('consultation-examen')) {
                     tinymce.get('consultation-examen').setContent('');
                 }
-                // Réinitialiser les sélecteurs
+                
                 $('#medecin').val('');
                 $('#victime-de').val('');
                 $('#type-requisition').val('');
+                
+                // Pour une nouvelle expertise, on vide le champ code
+                if(isNew) {
+                    $('#code-expertise').val('');
+                }
             }
 
             // Réinitialiser le formulaire à l'ouverture du modal
             $('#expertiseModal').on('show.bs.modal', function(event) {
-                // Déterminer si c'est un bouton "Nouvelle Expertise" qui a déclenché l'événement
                 const button = $(event.relatedTarget);
-                if (button && (button.hasClass('btn-success') || !button.data('id'))) {
-                    // C'est un ajout, donc réinitialiser le formulaire
-                    resetForm();
+                if (button && button.hasClass('btn-success')) {
+                    // C'est une nouvelle expertise
+                    resetForm(true);
                     loadMedecins();
                     loadVictimeDe();
                     setCurrentDateTime();
                 }
-                // Pour l'édition, ne rien faire ici car le formulaire sera rempli par le gestionnaire d'événement du bouton d'édition
             });
             
             // Initialiser DataTables pour le tableau avec chargement AJAX
@@ -505,7 +518,7 @@
                             }
                         }
                     },
-                    {
+                    { 
                         data: 'code_expertise',
                         render: function(data, type, row) {
                             return `
@@ -529,14 +542,9 @@
                 dom: 't<"d-flex justify-content-between"ip>'
             });
 
-            // Fonction pour rafraîchir le tableau
+            // Fonction pour rafraîchir le tableau après un ajout/modification/suppression réussi
             function refreshTable() {
                 expertisesTable.ajax.reload();
-            }
-
-            // Après un ajout/modification/suppression réussi
-            function handleSuccess() {
-                refreshTable();
             }
 
             // Gérer l'affichage de la recherche avancée
@@ -550,7 +558,7 @@
                     $(this).html('<i class="bi bi-plus-circle me-1"></i> Recherche avancée');
                 }
             });
-            
+
             // Recherche personnalisée
             $('#search-btn').on('click', function() {
                 applySearch();
@@ -562,7 +570,7 @@
                     applySearch();
                 }
             });
-            
+
             // Appliquer les filtres de recherche
             function applySearch() {
                 expertisesTable.search('').columns().search('').draw();
@@ -573,7 +581,7 @@
                 var type = $('#search-type-expertise').val();
                 var provenance = $('#search-provenance').val();
                 var statut = $('#search-statut').val();
-                
+
                 // Recherche par victime (colonne 3)
                 if(victim) {
                     expertisesTable.column(3).search(victim, true, false).draw();
@@ -594,11 +602,9 @@
                 if(type) {
                     expertisesTable.column(5).search(type, true, false).draw();
                 }
-                
                 if(provenance) {
                     expertisesTable.column(6).search(provenance, true, false).draw();
                 }
-                
                 if(statut) {
                     expertisesTable.column(7).search(statut, true, false).draw();
                 }
@@ -622,122 +628,6 @@
                 });
                 $('#date-expertise').val(formattedDateTime);
             }
-            
-          // Gérer le clic sur le bouton Modifier
-          $(document).on('click', '.edit-btn', function(e) {
-    e.preventDefault();
-    const expertiseId = $(this).data('id');
-    
-    // Afficher un message de chargement
-    console.log("Chargement de l'expertise ID:", expertiseId);
-    
-    // Requête AJAX pour récupérer les détails de l'expertise
-    $.ajax({
-        url: 'liste_expertise.php',
-        type: 'GET',
-        data: { code_expertise: expertiseId },
-        dataType: 'json',
-        success: function(response) {
-            console.log("Réponse de l'API:", response);
-            
-            if(response.status === 'success' && response.expertises && response.expertises.length > 0) {
-                // Prendre la première expertise du tableau
-                const expertise = response.expertises[0];
-                
-                // Modifiez le titre du modal
-                $('#expertiseModalLabel').text('Modifier Expertise');
-                
-                // Charger les listes déroulantes avant de définir les valeurs
-                loadMedecins();
-                loadVictimeDe();
-                
-                // Remplir le formulaire avec les données de l'expertise après un court délai
-                // pour permettre aux listes déroulantes de se charger
-                setTimeout(function() {
-                    // Remplir le formulaire avec les données de l'expertise
-                    $('#code-expertise').val(expertise.code_expertise);
-                    
-                    // Formater la date et l'heure
-                    if (expertise.date_heure) {
-                        $('#date-expertise').val(expertise.date_heure_formatee || expertise.date_heure);
-                    }
-                    
-                    // Définir les valeurs des select
-                    $('#medecin').val(expertise.medecin_id);
-                    $('#victime-de').val(expertise.victime_de_id);
-                    
-                    // Définir les valeurs des autres champs
-                    $('#nom-victime').val(expertise.nom_victime);
-                    $('#age-victime').val(expertise.age_victime);
-                    $('#provenance').val(expertise.provenance);
-                    $('#numero-requisition').val(expertise.numero_requisition || '');
-                    
-                    if (expertise.date_requisition) {
-                        // Convertir le format de date si nécessaire
-                        const dateParts = expertise.date_requisition.split('/');
-                        if (dateParts.length === 3) {
-                            $('#date-requisition').val(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
-                        } else {
-                            $('#date-requisition').val(expertise.date_requisition);
-                        }
-                    }
-                    
-                    $('#type-requisition').val(expertise.type_requisition || '');
-                    
-                    // Gérer le contenu de l'éditeur TinyMCE
-                    if (tinymce.get('consultation-examen')) {
-                        tinymce.get('consultation-examen').setContent(expertise.consultation_examen || '');
-                    } else {
-                        // Dans le cas où TinyMCE n'est pas initialisé
-                        tinymce.init({
-                            selector: '#consultation-examen',
-                            height: 400,
-                            plugins: [
-                                'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'image', 
-                                'link', 'lists', 'media', 'searchreplace', 'table', 'visualblocks', 
-                                'wordcount', 'checklist', 'mediaembed', 'casechange', 'formatpainter', 
-                                'pageembed', 'a11ychecker', 'tinymcespellchecker', 'permanentpen', 
-                                'powerpaste', 'advtable', 'advcode', 'editimage', 'advtemplate', 
-                                'ai', 'mentions', 'tinycomments', 'tableofcontents', 'footnotes', 
-                                'mergetags', 'autocorrect', 'typography', 'inlinecss', 'markdown',
-                                'importword', 'exportword', 'exportpdf'
-                            ],
-                            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | ' +
-                                    'link image media table mergetags | addcomment showcomments | ' +
-                                    'spellcheckdialog a11ycheck typography | align lineheight | ' +
-                                    'checklist numlist bullist indent outdent | emoticons charmap | removeformat',
-                            language: 'fr_FR',
-                            content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
-                            setup: function(editor) {
-                                editor.on('init', function() {
-                                    editor.setContent(expertise.consultation_examen || '');
-                                });
-                            }
-                        });
-                    }
-                    
-                    // Afficher des logs pour déboguer
-                    console.log("Valeurs définies dans le formulaire:");
-                    console.log("Médecin:", $('#medecin').val());
-                    console.log("Victime de:", $('#victime-de').val());
-                    console.log("Type requisition:", $('#type-requisition').val());
-                    
-                }, 500); // Délai de 500ms pour s'assurer que les listes déroulantes sont chargées
-                
-                // Ouvrir le modal
-                $('#expertiseModal').modal('show');
-                
-            } else {
-                console.error("Erreur: Expertise non trouvée ou format de réponse incorrect");
-                alert('Erreur: Impossible de charger les données de l\'expertise.');
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error("Erreur AJAX:", xhr, status, error);
-            alert('Erreur lors du chargement des données: ' + error);
-        }
-    });
-});
 
             // Gérer le bouton Supprimer
             $(document).on('click', '.delete-btn', function() {
@@ -747,7 +637,7 @@
                 // Ouvrir le modal de confirmation
                 $('#deleteConfirmModal').modal('show');
             });
-            
+
             // Confirmer la suppression
             $('#confirm-delete').on('click', function() {
                 const expertiseId = $('#deleteConfirmModal').data('expertise-id');
@@ -773,14 +663,14 @@
                     }
                 });
             });
-            
+
             // Gérer le clic sur le bouton Imprimer (modal)
             $('#print-expertise').on('click', function() {
                 // Dans une application réelle, on préparerait une mise en page pour impression
                 alert('Impression de l\'expertise...');
                 // window.print() ou redirection vers une page d'impression
             });
-            
+
             // Gérer le clic sur le bouton Imprimer (tableau)
             $('#print-btn').on('click', function() {
                 // Dans une application réelle, on préparerait une mise en page pour impression
@@ -798,7 +688,6 @@
                     'wordcount', 'checklist', 'mediaembed', 'casechange', 'formatpainter', 
                     'pageembed', 'a11ychecker', 'tinymcespellchecker', 'permanentpen', 
                     'powerpaste', 'advtable', 'advcode', 'editimage', 'advtemplate', 
-                    'ai', 'mentions', 'tinycomments', 'tableofcontents', 'footnotes', 
                     'mergetags', 'autocorrect', 'typography', 'inlinecss', 'markdown',
                     'importword', 'exportword', 'exportpdf'
                 ],
@@ -869,7 +758,6 @@
                         consultation_examen: consultationExamen
                     };
 
-                    // Afficher les données du formulaire dans la console pour debug
                     console.log("Données du formulaire à envoyer:", formData);
 
                     const isModification = $('#expertiseModalLabel').text() === 'Modifier Expertise';
@@ -886,8 +774,10 @@
                                 $('#expertiseModal').modal('hide');
                                 refreshTable();
                                 alert(response.message);
-                                // Réinitialiser le formulaire après avoir enregistré
-                                resetForm();
+                                // Réinitialiser le formulaire seulement pour un nouvel ajout
+                                if (!isModification) {
+                                    resetForm(true);
+                                }
                             } else {
                                 alert('Erreur: ' + response.message);
                             }
@@ -909,6 +799,90 @@
                 } else {
                     document.getElementById('expertise-form').reportValidity();
                 }
+            });
+
+            // Nouveau gestionnaire pour le bouton modifier
+            $(document).on('click', '.edit-btn', function(e) {
+                e.preventDefault();
+                const expertiseId = $(this).data('id');
+                console.log("Code expertise à modifier:", expertiseId); // Debug
+
+                // Charger l'expertise
+                $.ajax({
+                    url: 'liste_expertise.php',
+                    type: 'GET',
+                    data: { code_expertise: expertiseId },
+                    dataType: 'json',
+                    success: function(response) {
+                        console.log("Réponse reçue:", response); // Debug
+                        
+                        if (response.status === 'success' && response.expertises && response.expertises.length > 0) {
+                            const expertise = response.expertises[0];
+                            
+                            // Changement du titre du modal
+                            $('#expertiseModalLabel').text('Modifier Expertise');
+                            
+                            // Première étape : charger les médecins
+                            $.ajax({
+                                url: 'liste_medecin.php',
+                                type: 'GET',
+                                dataType: 'json',
+                                success: function(medecinResponse) {
+                                    if (medecinResponse.status === 'success') {
+                                        const select = $('#medecin');
+                                        select.empty();
+                                        select.append('<option value="" disabled>Sélectionnez un médecin</option>');
+                                        medecinResponse.medecins.forEach(function(medecin) {
+                                            select.append(`<option value="${medecin.code}">Dr. ${medecin.nom}</option>`);
+                                        });
+                                        select.val(expertise.medecin_id);
+                                        
+                                        // Deuxième étape : charger les types d'expertise
+                                        $.ajax({
+                                            url: 'liste_type_expertises.php',
+                                            type: 'GET',
+                                            dataType: 'json',
+                                            success: function(typeResponse) {
+                                                if (typeResponse.status === 'success') {
+                                                    const select = $('#victime-de');
+                                                    select.empty();
+                                                    select.append('<option value="" disabled>Sélectionnez un type</option>');
+                                                    typeResponse.types.forEach(function(type) {
+                                                        select.append(`<option value="${type.code_type}">${type.nom_type}</option>`);
+                                                    });
+                                                    select.val(expertise.victime_de_id);
+                                                    
+                                                    // Remplir tous les autres champs
+                                                    $('#code-expertise').val(expertise.code_expertise);
+                                                    $('#date-expertise').val(expertise.date_heure_formatee || expertise.date_heure);
+                                                    $('#nom-victime').val(expertise.nom_victime);
+                                                    $('#age-victime').val(expertise.age_victime);
+                                                    $('#provenance').val(expertise.provenance);
+                                                    $('#numero-requisition').val(expertise.numero_requisition || '');
+                                                    $('#date-requisition').val(expertise.date_requisition || '');
+                                                    $('#type-requisition').val(expertise.type_requisition || '');
+                                                    
+                                                    if (tinymce.get('consultation-examen')) {
+                                                        tinymce.get('consultation-examen').setContent(expertise.consultation_examen || '');
+                                                    }
+                                                    
+                                                    // Ouvrir le modal
+                                                    $('#expertiseModal').modal('show');
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                        } else {
+                            alert("Impossible de charger les données de l'expertise");
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Erreur lors du chargement:", error);
+                        alert("Erreur lors du chargement de l'expertise");
+                    }
+                });
             });
         });
     </script>

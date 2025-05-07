@@ -31,7 +31,8 @@ try {
     
     error_log("Reçu victime_de_id: " . var_export($victime_de_id, true));
     
-    $code_expertise = $_POST['code_expertise'] ?? ('EXP-' . date('Ymd') . '-' . sprintf('%03d', rand(1, 999)));
+    // Générer un nouveau code d'expertise
+    $code_expertise = generateUniqueCode($pdo);
     
     // Debug des valeurs extraites
     error_log("medecin_id: " . var_export($medecin_id, true));
@@ -128,14 +129,19 @@ try {
  * 
  * @return string Le code unique généré
  */
-function generateUniqueCode()
+function generateUniqueCode($pdo)
 {
-    // Obtenir la date actuelle
-    $date = new DateTime();
+    do {
+        // Générer un code
+        $date = new DateTime();
+        $code = 'EXP-' . $date->format('Ymd') . '-' . sprintf('%03d', rand(1, 999));
+        
+        // Vérifier si le code existe déjà
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM t_expertises WHERE code_expertise = ?");
+        $stmt->execute([$code]);
+        $exists = $stmt->fetchColumn() > 0;
+    } while ($exists); // Continuer tant que le code existe
     
-    // Formater la date selon le format souhaité
-    $uniqueCode = 'EXP-' . $date->format('Ymd') . '-' . sprintf('%03d', rand(1, 999));
-    
-    return $uniqueCode;
+    return $code;
 }
 ?>
