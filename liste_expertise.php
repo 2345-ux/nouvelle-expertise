@@ -18,7 +18,7 @@ try {
     $type_expertise = isset($_GET['type_expertise']) ? $_GET['type_expertise'] : '';
     $code_expertise = isset($_GET['code_expertise']) ? $_GET['code_expertise'] : '';
 
-    // Construction de la requête SQL de base
+    // Modification de la construction de la requête SQL de base
     $sql = "SELECT 
             e.code_expertise,
             e.date_heure,
@@ -29,17 +29,24 @@ try {
             e.date_requisition,
             e.type_requisition,
             e.victime_de_id,
-            e.consultation_examen,
+            CASE 
+                WHEN e.consultation_examen IS NOT NULL AND e.consultation_examen != '' 
+                THEN 'Consultation disponible'
+                ELSE 'Aucune consultation'
+            END as consultation_status,
             e.medecin_id,
             m.nom AS nom_medecin,
             m.sexe AS sexe_medecin,
-            te.nom_type AS nom_victime_de
-        FROM 
-            t_expertises e
-        LEFT JOIN 
-            t_medecins m ON e.medecin_id = m.code
-        LEFT JOIN
-            t_types_expertise te ON e.victime_de_id = te.code_type";
+            te.nom_type AS nom_victime_de";
+
+    // Si un code_expertise spécifique est demandé, on récupère aussi consultation_examen
+    if (!empty($_GET['code_expertise'])) {
+        $sql = str_replace('END as consultation_status', 'END as consultation_status, e.consultation_examen', $sql);
+    }
+
+    $sql .= " FROM t_expertises e
+        LEFT JOIN t_medecins m ON e.medecin_id = m.code
+        LEFT JOIN t_types_expertise te ON e.victime_de_id = te.code_type";
 
     // Si un code_expertise spécifique est demandé
     if (!empty($_GET['code_expertise'])) {

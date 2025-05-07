@@ -14,6 +14,9 @@
         body {
             font-family: 'Arial', sans-serif;
             background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         .nav-link {
             color: #fff;
@@ -49,6 +52,12 @@
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        footer {
+            margin-top: auto;
+            width: 100%;
+            background-color: #000;
+            color: white;
         }
     </style>
 </head>
@@ -123,21 +132,12 @@
                                     <label for="expertise-type" class="form-label">Type d'expertise</label>
                                     <select class="form-select" id="expertise-type">
                                         <option value="all">Tous les types</option>
-                                        <option value="cardiologie">Cardiologie</option>
-                                        <option value="neurologie">Neurologie</option>
-                                        <option value="orthopedique">Orthopédique</option>
-                                        <option value="psychiatrique">Psychiatrique</option>
-                                        <option value="traumatologique">Traumatologique</option>
                                     </select>
                                 </div>
                                 <div class="mb-3">
                                     <label for="doctor" class="form-label">Médecin</label>
                                     <select class="form-select" id="doctor">
                                         <option value="all">Tous les médecins</option>
-                                        <option value="1">Dr. Dupont</option>
-                                        <option value="2">Dr. Martin</option>
-                                        <option value="3">Dr. Dubois</option>
-                                        <option value="4">Dr. Bernard</option>
                                     </select>
                                 </div>
                                 <div class="d-grid gap-2">
@@ -156,7 +156,7 @@
             <div class="col-md-6 mb-4">
                 <div class="card">
                     <div class="card-header bg-white">
-                        <h5 class="card-title mb-0">Expertises par catégorie</h5>
+                        <h5 class="card-title mb-0">Expertises par Types</h5>
                     </div>
                     <div class="card-body">
                         <div class="chart-container">
@@ -185,7 +185,6 @@
                 <div class="card" id="recent-expertises">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">Expertises récentes</h5>
-                        <a href="toutes-expertises.html" class="btn btn-sm btn-outline-primary">Voir tout</a>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -250,45 +249,21 @@
                             </table>
                         </div>
                         <div class="card-footer text-center">
-                            <a href="recentes_expertises.php" class="btn btn-primary">Voir toutes les expertises</a>
+                            <a href="nouvelle-expertise.html" class="btn btn-primary">Voir toutes les expertises</a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Section outils d'administration -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header bg-secondary text-white">
-                        <h4>Outils d'administration</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <div class="d-grid">
-                                    <a href="migration_victime_de.php" class="btn btn-outline-primary">
-                                        <i class="bi bi-arrow-repeat"></i> Migrer "victime de" vers types d'expertise
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <footer class="bg-dark text-white py-4 mt-4">
+    <footer class="py-4 mt-4">
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <h5>Expertise Médicale</h5>
-                    <p>Application de gestion des expertises médicales</p>
+                    <h5 class="text-white">Expertise Médicale</h5>
+                    <p class="text-white-50">Application de gestion des expertises médicales</p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <p>&copy; 2023 Expertise Médicale. Tous droits réservés.</p>
+                    <p class="text-white-50">&copy; 2023 Expertise Médicale. Tous droits réservés.</p>
                 </div>
             </div>
         </div>
@@ -304,22 +279,15 @@
         const pieChart = new Chart(pieCtx, {
             type: 'pie',
             data: {
-                labels: ['Cardiologie', 'Neurologie', 'Orthopédique', 'Psychiatrique', 'Traumatologique'],
+                labels: [],
                 datasets: [{
-                    data: [38, 25, 32, 18, 39],
+                    data: [],
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.7)',
                         'rgba(54, 162, 235, 0.7)',
                         'rgba(255, 206, 86, 0.7)',
                         'rgba(75, 192, 192, 0.7)',
                         'rgba(153, 102, 255, 0.7)',
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
                     ],
                     borderWidth: 1
                 }]
@@ -335,10 +303,8 @@
                         callbacks: {
                             label: function(context) {
                                 const label = context.label || '';
-                                const value = context.raw || 0;
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = Math.round((value / total) * 100);
-                                return `${label}: ${value} (${percentage}%)`;
+                                const percentage = context.raw || 0;
+                                return `${label}: ${percentage.toFixed(1)}%`;
                             }
                         }
                     }
@@ -386,33 +352,20 @@
         });
 
         // Charger les statistiques
+        // Modification de la fonction loadStats pour actualisation en temps réel
         function loadStats() {
-            // Charger le nombre total d'expertises
-            fetch('count_expertises.php')
+            fetch('count_expertises.php?' + new Date().getTime())
                 .then(response => response.json())
                 .then(data => {
                     if(data.status === 'success') {
                         document.getElementById('total-expertises').textContent = data.data.total;
-                        
-                        // Mettre à jour le graphique en camembert
-                        const typeData = data.data.par_type;
-                        pieChart.data.labels = typeData.map(item => item.type_requisition);
-                        pieChart.data.datasets[0].data = typeData.map(item => item.count);
-                        pieChart.update();
-                    }
-                })
-                .catch(error => console.error('Erreur:', error));
-
-            // Charger le nombre de catégories
-            fetch('count_categories.php')
-                .then(response => response.json())
-                .then(data => {
-                    if(data.status === 'success') {
-                        document.getElementById('categories-count').textContent = data.data.total;
                     }
                 })
                 .catch(error => console.error('Erreur:', error));
         }
+
+        // Ajouter une actualisation automatique toutes les 30 secondes
+        setInterval(loadStats, 30000);
 
         // Fonction pour charger les expertises récentes
         function loadRecentExpertises() {
@@ -464,18 +417,62 @@
                 .catch(error => console.error('Erreur:', error));
         }
 
+        // Ajouter cette fonction pour charger les stats des types d'expertise
+        function loadExpertiseTypeStats() {
+            fetch('stats_types_expertise.php')
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        pieChart.data.labels = data.data.map(item => item.type_expertise);
+                        pieChart.data.datasets[0].data = data.data.map(item => parseFloat(item.pourcentage));
+                        pieChart.update();
+                    }
+                })
+                .catch(error => console.error('Erreur:', error));
+        }
+
+        // Ajouter cette fonction pour charger les options de filtres
+        function loadFilterOptions() {
+            fetch('get_filter_options.php')
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        // Remplir le select des types d'expertise
+                        const typeSelect = document.getElementById('expertise-type');
+                        data.data.types.forEach(type => {
+                            const option = new Option(type, type);
+                            typeSelect.add(option);
+                        });
+
+                        // Remplir le select des médecins
+                        const doctorSelect = document.getElementById('doctor');
+                        data.data.medecins.forEach(medecin => {
+                            const option = new Option(medecin.nom_complet, medecin.code);
+                            doctorSelect.add(option);
+                        });
+                    }
+                })
+                .catch(error => console.error('Erreur:', error));
+        }
+
         // Charger les statistiques et les expertises récentes au chargement
         document.addEventListener('DOMContentLoaded', function() {
-            loadStats();
+            loadFilterOptions();
+            loadExpertiseTypeStats();
             loadRecentExpertises();
             loadEvolution();
         });
 
         // Gestionnaires d'événements pour les filtres
         document.getElementById('apply-filter').addEventListener('click', function() {
-            // Code pour appliquer les filtres et mettre à jour les graphiques
-            // Dans une application réelle, cela ferait un appel à une API
-            alert('Filtres appliqués');
+            const filters = {
+                date_range: document.getElementById('date-range').value,
+                type_expertise: document.getElementById('expertise-type').value,
+                medecin_id: document.getElementById('doctor').value
+            };
+            
+            // Recharger les données avec les filtres
+            loadFilteredData(filters);
         });
 
         document.getElementById('reset-filter').addEventListener('click', function() {
@@ -486,6 +483,20 @@
             // Dans une application réelle, cela mettrait à jour les graphiques
             alert('Filtres réinitialisés');
         });
+
+        // Ajouter la fonction pour charger les données filtrées
+        function loadFilteredData(filters) {
+            const queryString = new URLSearchParams(filters).toString();
+            fetch('liste_expertise.php?' + queryString)
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        // Mettre à jour le tableau et les graphiques avec les données filtrées
+                        updateDisplayWithFilteredData(data);
+                    }
+                })
+                .catch(error => console.error('Erreur:', error));
+        }
     </script>
 </body>
 </html>

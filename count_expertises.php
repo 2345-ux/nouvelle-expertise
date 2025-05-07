@@ -1,5 +1,7 @@
 <?php
 header('Content-Type: application/json');
+header('Cache-Control: no-cache, must-revalidate');
+header('Expires: Sat, 26 Jul 1997 05:00:00 GMT');
 
 try {
     $pdo = new PDO(
@@ -9,37 +11,15 @@ try {
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
 
-    // Compte total des expertises
+    // Compte uniquement le total des expertises
     $stmt = $pdo->query("SELECT COUNT(*) as total FROM t_expertises");
     $total = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
-
-    // Compte par type de réquisition
-    $stmt = $pdo->query("
-        SELECT 
-            type_requisition,
-            COUNT(*) as count
-        FROM 
-            t_expertises
-        GROUP BY 
-            type_requisition
-    ");
-    $par_type = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Compte des expertises du mois en cours
-    $stmt = $pdo->query("
-        SELECT COUNT(*) as count 
-        FROM t_expertises 
-        WHERE MONTH(date_heure) = MONTH(CURRENT_DATE())
-        AND YEAR(date_heure) = YEAR(CURRENT_DATE())
-    ");
-    $ce_mois = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
 
     echo json_encode([
         'status' => 'success',
         'data' => [
             'total' => $total,
-            'par_type' => $par_type,
-            'ce_mois' => $ce_mois
+            'timestamp' => date('Y-m-d H:i:s')
         ]
     ]);
 

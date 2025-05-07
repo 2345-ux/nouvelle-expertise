@@ -375,7 +375,7 @@
                                 select.append('<option value="" selected disabled>Sélectionnez un médecin</option>');
                                 
                                 response.medecins.forEach(function(medecin) {
-                                    select.append(`<option value="${medecin.code}">Dr. ${medecin.nom}</option>`);
+                                    select.append(`<option value="${medecin.code}">${medecin.nom}</option>`);
                                 });
                                 
                                 if (selectedValue) {
@@ -523,7 +523,7 @@
                         render: function(data, type, row) {
                             return `
                                 <button class="btn btn-sm btn-primary btn-action edit-btn" data-id="${data}" 
-                                        title="Consultation: ${row.consultation_examen || 'Aucune'}">
+                                        title="${row.consultation_status}">
                                     <i class="bi bi-pencil"></i>
                                 </button>
                                 <button class="btn btn-sm btn-danger btn-action delete-btn" data-id="${data}">
